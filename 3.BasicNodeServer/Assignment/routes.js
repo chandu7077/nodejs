@@ -8,9 +8,10 @@ const requestHandler = (request,response) => {
               <body>
               <h1>WELCOME TO HOME PAGE</h1>
               <form method="POST" action="/create-user">
-              <label for="username">Username</label><br>
-              <input name="username"><br>
-              <button type="submit">Create User</button>
+              <label for="username">Username</label><br><br>
+              <input name="username"><br><br>
+              <button type="submit">Create User</button><br><br>
+              <a href="/users">Show Users</a>
               </form>
               </body>
             </html>
