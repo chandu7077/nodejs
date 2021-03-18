@@ -10,8 +10,17 @@ exports.addCrypto = (request,response,next) => {
     response.status(201).send({"response":"Added Successfully"});
 }
 
+exports.getProductByCode = (request,response,next) => {
+    const code = request.params.code;
+    CryptoCurrency.findByCode(code, crypto => {
+        response.send(crypto);
+    })
+}
+
 exports.getCryptoCurrencies = (request,response,next) => {
-    let cryptos = CryptoCurrency.fetchAll()
-    let data={cryptos};
-    response.send(data);
+    CryptoCurrency.fetchAll(cryptos => {
+        let data={cryptos};
+        response.send(data);
+    })
+  
 }
