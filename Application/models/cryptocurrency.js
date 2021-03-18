@@ -20,9 +20,14 @@ const readFromFile = callback => {
 
 module.exports = class CryptoCurrency {
 
-    constructor(name, code) {
+    constructor(name, code, description, currentPrice, closingPrice, volume, change) {
         this.name = name;
         this.code = code;
+        this.description = description,
+        this.currentPrice = currentPrice,
+        this.closingPrice = closingPrice,
+        this.volume = volume,
+        this.change = change
     }
 
     save() {
@@ -39,6 +44,7 @@ module.exports = class CryptoCurrency {
         readFromFile(cryptos => {
             const crypto = cryptos.find(obj => obj.code === code);
             callback(crypto);
+            
         })
     }
 
