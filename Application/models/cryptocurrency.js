@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const db = require("../util/dbconnection");
 const file = path.join(path.dirname(require.main.filename),"data","cryptos.json");
 
 const readFromFile = callback => {
@@ -30,33 +31,24 @@ module.exports = class CryptoCurrency {
     }
 
     save() {
-        console.log(file);
-        readFromFile(cryptos => {
-            const index = cryptos.findIndex(obj => obj.code === this.code);
-            if(index>=0) {
-                cryptos[index] = this;
-            }
-            else {
-                cryptos.push(this);
-            }
-            fs.writeFile(file,JSON.stringify(cryptos), err=> {
-                console.log(err);
-            });
-        })
+        return db.execute(
+            `INSERT INTO 
+             cryptocurrency
+             VALUES
+             (?, ?, ?, ?, ?, ?, ?)`,
+             [ this.code, this.name, this.description, this.currentPrice, this.closingPrice, this.volume, this.change]
+             )
     }
 
-    static findByCode(code, callback) {
-        readFromFile(cryptos => {
-            const crypto = cryptos.find(obj => obj.code === code);
-            callback(crypto);
-            
-        })
+    static findByCode(code) {
+        return db.execute(
+            `SELECT * FROM cryptocurrency where cryptocurrency.code = ?`,
+             [code]
+        )
     }
 
-    static fetchAll(callback) {
-        readFromFile(cryptos => {
-            callback(cryptos);
-        });  
+    static fetchAll() {
+        return db.execute("SELECT * FROM cryptocurrency");   
     }
 
 }

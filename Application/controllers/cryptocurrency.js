@@ -11,23 +11,29 @@ exports.addCrypto = (request,response,next) => {
     const change = request.body.change;
 
     const crypto = new CryptoCurrency(name, code, description, currentPrice, closingPrice, volume, change);
-    crypto.save();
-    response.status(201).send({"response":"Added Successfully"});
+    crypto.save()
+    .then(()=> {
+        response.status(201).send({"response":"Added Successfully"});
+    })
+    .catch(err=> {
+        console.log(err);
+    });
+    
 }
 
-exports.getProductByCode = (request,response,next) => {
+exports.getCryptoByCode = (request,response,next) => {
     const code = request.params.code;
-    CryptoCurrency.findByCode(code, crypto => {
+    CryptoCurrency.findByCode(code).then(([cryptos, fieldData]) => {
+        crypto = cryptos[0];
         if(crypto)
         response.status(200).send(crypto);
         else
         response.status(204).send("Cryptocurrency Not Found");
-    })
+    });
 }
 
 exports.getCryptoCurrencies = (request,response,next) => {
-    CryptoCurrency.fetchAll(cryptos => {
-        let data={cryptos};
-        response.send(data);
+    CryptoCurrency.fetchAll().then( ([cryptos, fieldData]) => {
+        response.send(cryptos);
     })
 }
