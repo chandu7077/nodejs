@@ -2,23 +2,24 @@ const Sequelize = require("sequelize");
 
 const sequelize = require("../util/dbconnection");
 
-const Cart = sequelize.define("cart", {
+const TransactionItem = sequelize.define("transactionitem", {
     id: {
         type:Sequelize.INTEGER,
         autoIncrement:true,
         allowNull:false,
         primaryKey:true
     },
-    totalPrice:{
-        type:Sequelize.DOUBLE
+    quantity:{
+        type:Sequelize.INTEGER,
+        default:1
     }
+
 },
 {
     name: {
-        singular: 'cart',
-        plural: 'carts',
+        singular: 'transactionitem',
+        plural: 'transactionitems',
     }
-}
-);
+});
 
-module.exports = Cart;
+module.exports = TransactionItem;

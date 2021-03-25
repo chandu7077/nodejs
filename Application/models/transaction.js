@@ -2,7 +2,7 @@ const Sequelize = require("sequelize");
 
 const sequelize = require("../util/dbconnection");
 
-const Cart = sequelize.define("cart", {
+const Transaction = sequelize.define("transaction", {
     id: {
         type:Sequelize.INTEGER,
         autoIncrement:true,
@@ -11,14 +11,17 @@ const Cart = sequelize.define("cart", {
     },
     totalPrice:{
         type:Sequelize.DOUBLE
+    },
+    paymentMode:{
+        type:Sequelize.STRING
     }
 },
 {
     name: {
-        singular: 'cart',
-        plural: 'carts',
+        singular: 'transaction',
+        plural: 'transactions',
     }
 }
 );
 
-module.exports = Cart;
+module.exports = Transaction;

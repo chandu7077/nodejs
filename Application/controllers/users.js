@@ -5,3 +5,4 @@ exports.choosePayment = (request,response,next) => {
     else
     response.send(request.body.crypto+" Selected");
 }
+

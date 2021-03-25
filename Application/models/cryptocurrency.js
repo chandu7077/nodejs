@@ -1,54 +1,51 @@
-const fs = require("fs");
-const path = require("path");
-const db = require("../util/dbconnection");
-const file = path.join(path.dirname(require.main.filename),"data","cryptos.json");
+const Sequelize = require("sequelize");
 
-const readFromFile = callback => {
-    let cryptos=[];
-    fs.readFile(file,(err, fileContent)=>{
-        if(!err) {
-            cryptos = JSON.parse(fileContent);
-            callback(cryptos);
-        }
-        else {
-            callback([]);
-        }
-        
-    });
-    
+const sequelize = require("../util/dbconnection");
+
+const CryptoCurrency = sequelize.define("cryptocurrency", {
+    id: {
+        type:Sequelize.INTEGER,
+        autoIncrement:true,
+        allowNull:false,
+        primaryKey:true
+    },
+    code:{
+        type:Sequelize.STRING,
+        allowNull:false,
+        unique:true,
+    },
+    name:{
+        type:Sequelize.STRING,
+        allowNull:false,
+        unique:true,
+    },
+    description:{
+        type:Sequelize.TEXT,
+        allowNull:true,
+    },
+    currentPrice: {
+        type:Sequelize.DOUBLE,
+        allowNull:false
+    },
+    closingPrice: {
+        type:Sequelize.DOUBLE,
+        allowNull:false
+    },
+    volume:{
+        type:Sequelize.STRING,
+        allowNull:false,
+    },
+    change:{
+        type:Sequelize.STRING,
+        allowNull:false,
+    }
+},
+{
+    name: {
+        singular: 'crypto',
+        plural: 'cryptos',
+    }
 }
+)
 
-module.exports = class CryptoCurrency {
-
-    constructor(name, code, description, currentPrice, closingPrice, volume, change) {
-        this.name = name;
-        this.code = code;
-        this.description = description,
-        this.currentPrice = currentPrice,
-        this.closingPrice = closingPrice,
-        this.volume = volume,
-        this.change = change
-    }
-
-    save() {
-        return db.execute(
-            `INSERT INTO 
-             cryptocurrency
-             VALUES
-             (?, ?, ?, ?, ?, ?, ?)`,
-             [ this.code, this.name, this.description, this.currentPrice, this.closingPrice, this.volume, this.change]
-             )
-    }
-
-    static findByCode(code) {
-        return db.execute(
-            `SELECT * FROM cryptocurrency where cryptocurrency.code = ?`,
-             [code]
-        )
-    }
-
-    static fetchAll() {
-        return db.execute("SELECT * FROM cryptocurrency");   
-    }
-
-}
+module.exports = CryptoCurrency;
