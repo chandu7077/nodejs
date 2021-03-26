@@ -51,9 +51,20 @@ const idValidator = (object) => {
     return object("id").isNumeric();
 }
 
-router.get("/cryptos/:code", CryptoController.getCryptoByCode);
+router.get("/cryptos/:code", codeValidator(param),CryptoController.getCryptoByCode);
 router.get("/cryptos",CryptoController.getCryptoCurrencies);
-router.post("/add-crypto", checkAdminLogin, CryptoController.addCrypto);
+
+router.post("/add-crypto", 
+    [   
+        codeValidator(body),
+        nameValidator(body),
+        changeValidator(body),
+        currentPriceValidator(body),
+        closingPriceValidator(body),
+        idValidator(body)
+    ],
+    checkAdminLogin, CryptoController.addCrypto);
+
 router.put("/edit-crypto", 
     [   
         codeValidator(body,true),
@@ -64,5 +75,6 @@ router.put("/edit-crypto",
         idValidator(body,true)
     ],
      checkAdminLogin, CryptoController.editCrypto);
-router.delete("/delete/:code", checkAdminLogin,CryptoController.deleteCryptoByCode);
+
+router.delete("/delete/:code", codeValidator(param), checkAdminLogin,CryptoController.deleteCryptoByCode);
 module.exports = router;

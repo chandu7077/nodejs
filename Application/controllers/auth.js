@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
 const dotenv = require('dotenv');
 const { body, validationResult } = require('express-validator');
+const UserNotFound = require("../errors/error.js");
 dotenv.config();
 
 exports.login = async (request,response,next) => {
@@ -14,7 +15,13 @@ exports.login = async (request,response,next) => {
     if (!errors.isEmpty()) {
       return response.status(400).json({ errors: errors.array() });
     }
-    const user = await User.findOne({where:{email:email}});
+    const user = await User.findOne({where:{email:email}}).catch(err => next(err));
+
+    if(_.isNil(user)) {
+        const error = new UserNotFound("User Not Found",400);
+        next(error);
+    }
+
     if(user) {
         const valid = await bcrypt.compare(password,user.password);
         if(valid) {
@@ -26,6 +33,9 @@ exports.login = async (request,response,next) => {
         else {
             response.status(400).send("Bad Request");
         }
+    }
+    else {
+
     }
 }
 

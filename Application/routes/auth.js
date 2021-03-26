@@ -15,6 +15,7 @@ const emailValidator = (object) =>{
                 }
                 return true;
             })
+            .normalizeEmail();
 }
 
 const passwordValidator = body("password","PLease enter proper password").isAlphanumeric().isLength({min:5});
@@ -53,5 +54,5 @@ router.post("/reset-password",
     ],
     authController.resetPassword);
 
-    
+
 module.exports = router;

@@ -65,7 +65,7 @@ const csrfProtection = csrf({ cookie: true });
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
-// app.use(csrfProtection);
+app.use(csrfProtection);
 app.use(
     session({
         secret:"terces", 
@@ -77,12 +77,15 @@ app.use(
 app.use("/auth",authRoutes);
 app.use(authentication);
 app.use(cryptoRoutes);
-app.use("/cart",cartRoutes);
+app.use("/cart",authentication,cartRoutes);
 app.use("/transaction",transactionRoutes)
 app.use("/admin",adminRoutes);
 app.use("/user",userRoutes);
 app.get("/",homePage);
 app.use(errorRoutes);
+app.use((error, req, res, next) => {
+    res.status(error.status).send({from:"Error Middlewhere",error:error});
+});
 
 sequelize
 // .sync({force:true})
