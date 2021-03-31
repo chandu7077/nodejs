@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from 'fs';
 
 const cryptos = ["Bitcoin","Ethereum","Ripple"];
 const payments = [cryptos,"COD","UPI","Credit Card","Debit Card","Wallet","Bank Transfer"];
@@ -58,7 +58,7 @@ const requestHandler = (request,response) => {
 // module.exports.name = "routes";
 // exports.payments = payments;
 
-module.exports = {
+export default {
     handler:requestHandler
-}
+};
     

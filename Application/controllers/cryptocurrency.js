@@ -1,6 +1,7 @@
 
 const CryptoCurrency = require("../models/cryptocurrency");
 const { validationResult } = require('express-validator');
+const sock = require("../socket");
 const _ = require("lodash");
 
 exports.addCrypto = (request,response,next) => {
@@ -24,9 +25,9 @@ exports.addCrypto = (request,response,next) => {
     
 }
 
-exports.editCrypto = (request,response,next) => {
+exports.editCrypto = async (request,response,next) => {
     const obj = request.body;
-    const crypto = CryptoCurrency.findOne({where:{id:obj.id}});
+    const crypto = await CryptoCurrency.findOne({where:{id:obj.id}});
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
       return response.status(400).json({ errors: errors.array() });
@@ -35,9 +36,11 @@ exports.editCrypto = (request,response,next) => {
         crypto[key] = value;
     },{})
 
-    CryptoCurrency
+    await CryptoCurrency
     .update(crypto,{where:{id:obj.id}})
-    .then(()=> {
+    .then(async ()=> {
+        let io = sock.getIO();
+        await io.emit("message", obj);
         response.status(201).send({new:crypto, "response":"Edited Successfully"});
     })
     .catch(err=> {

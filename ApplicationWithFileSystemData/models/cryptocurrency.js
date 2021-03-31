@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+import fs from 'fs';
+import path from 'path';
 const file = path.join(path.dirname(require.main.filename),"data","cryptos.json");
 
 const readFromFile = callback => {
@@ -17,7 +17,7 @@ const readFromFile = callback => {
     
 }
 
-module.exports = class CryptoCurrency {
+export default class CryptoCurrency {
 
     constructor(name, code, description, currentPrice, closingPrice, volume, change) {
         this.name = name;
@@ -59,4 +59,4 @@ module.exports = class CryptoCurrency {
         });  
     }
 
-}
+};

@@ -4,6 +4,7 @@ var _ = require('lodash');
 
 exports.addCryptoToCart = async (request,response,next) => {
     const cart = await request.session.user.getCart();
+    // console.log(request.session);
     const cryptos = await cart.getCryptos();
     const code = request.body.code;
     let quantity = parseInt( request.body.quantity);

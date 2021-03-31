@@ -1,9 +1,8 @@
-class UserNotFound extends Error {  
-    constructor (message,status = 404) {
-      super(message)
+class BaseError extends Error {  
+    constructor (name,message,status = 404) {
+      super(message);
       Error.captureStackTrace(this, this.constructor);
-  
-      this.name = this.constructor.name
+      this.name = name;
       this.status = status;
     }
   
@@ -12,5 +11,5 @@ class UserNotFound extends Error {
     }
 }
 
-module.exports = UserNotFound;
+module.exports = BaseError;
 

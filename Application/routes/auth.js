@@ -7,18 +7,20 @@ const {endsWith} = require("lodash/string");
 
 const emailValidator = (object) =>{
     return  object('email')
+            .exists()
             .isEmail()
             .withMessage("Please enter a valid email")
+            .toLowerCase()
             .custom(value => {
                 if(!endsWith(value,"@crypto.com")) {
                     throw new Error("Domain in email invalid");
                 }
                 return true;
-            })
-            .normalizeEmail();
+            });
+            
 }
 
-const passwordValidator = body("password","PLease enter proper password").isAlphanumeric().isLength({min:5});
+const passwordValidator = body("password","Please enter proper password").isAlphanumeric().isLength({min:5});
 
 
 // ROUTERS
@@ -49,7 +51,8 @@ router.get("/reset-password-token/:email",
 router.post("/reset-password",
     [ 
         emailValidator(body),
-        passwordValidator
+        body("newPassword","Please enter proper password").exists().isAlphanumeric().isLength({min:5}),
+        body("token","Provide token").exists()
         
     ],
     authController.resetPassword);

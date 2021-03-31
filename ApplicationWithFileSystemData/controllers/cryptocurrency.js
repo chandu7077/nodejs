@@ -1,7 +1,7 @@
 
-const CryptoCurrency = require("../models/cryptocurrency");
+import CryptoCurrency from '../models/cryptocurrency';
 
-exports.addCrypto = (request,response,next) => {
+export const addCrypto = (request,response,next) => {
     const name = request.body.name;
     const code = request.body.code;
     const description = request.body.description;
@@ -13,9 +13,9 @@ exports.addCrypto = (request,response,next) => {
     const crypto = new CryptoCurrency(name, code, description, currentPrice, closingPrice, volume, change);
     crypto.save();
     response.status(201).send({"response":"Added Successfully"});
-}
+};
 
-exports.getProductByCode = (request,response,next) => {
+export const getProductByCode = (request,response,next) => {
     const code = request.params.code;
     CryptoCurrency.findByCode(code, crypto => {
         if(crypto)
@@ -23,11 +23,11 @@ exports.getProductByCode = (request,response,next) => {
         else
         response.status(204).send("Cryptocurrency Not Found");
     })
-}
+};
 
-exports.getCryptoCurrencies = (request,response,next) => {
+export const getCryptoCurrencies = (request,response,next) => {
     CryptoCurrency.fetchAll(cryptos => {
         let data={cryptos};
         response.send(data);
     })
-}
+};

@@ -5,5 +5,5 @@ const Transaction = require("../models/transaction");
 const {checkLogin} = require("../middleware/logged");
 
 router.get("/create/:paymentMode",checkLogin,TransactionController.createTransaction);
-router.get("/",checkLogin,TransactionController.fetchAllTransactions);
+router.get("/:page",checkLogin,TransactionController.fetchAllTransactions);
 module.exports = router;

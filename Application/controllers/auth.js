@@ -6,7 +6,9 @@ const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
 const dotenv = require('dotenv');
 const { body, validationResult } = require('express-validator');
-const UserNotFound = require("../errors/error.js");
+const BaseError = require("../errors/error.js");
+const HttpStatusCode = require("../errors/status");
+const {UserNotFoundException,InvalidAccessTokenException} = require("../errors/names");
 dotenv.config();
 
 exports.login = async (request,response,next) => {
@@ -18,24 +20,23 @@ exports.login = async (request,response,next) => {
     const user = await User.findOne({where:{email:email}}).catch(err => next(err));
 
     if(_.isNil(user)) {
-        const error = new UserNotFound("User Not Found",400);
-        next(error);
+
+        next(UserNotFoundException);
     }
 
-    if(user) {
-        const valid = await bcrypt.compare(password,user.password);
+    else {
+        const valid = await bcrypt.compare(password,user.password).catch(err => next(err));
+
         if(valid) {
             request.session.user = user.dataValues;
             request.session.isLoggedIn = true;
-            const token = jwt.sign({email:email}, process.env.TOKEN_SECRET, { expiresIn: '2592000s' })
-            response.send({response:"LogIn Success",token:token});
+            const token = jwt.sign({email:email}, process.env.TOKEN_SECRET, { expiresIn: '24h' })
+            response.json({resp:"LogIn Success",token:token});
         }
         else {
-            response.status(400).send("Bad Request");
+            const error = new BaseError("InvalidUserLogin","Wrong user credentials",HttpStatusCode.BAD_REQUEST);
+            next(error);
         }
-    }
-    else {
-
     }
 }
 
@@ -44,8 +45,16 @@ exports.resetPasswordToken = async (req,res,next) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const token = jwt.sign({email:req.params.email}, process.env.TOKEN_SECRET, { expiresIn: '180s' })
-    res.send({email:req.params.email,token:token});
+    user = await User.findOne({where:{email:req.params.email}}).catch(err => next(err));
+
+    if(!_.isNil(user)) {
+        const token = jwt.sign({email:req.params.email}, process.env.TOKEN_SECRET, { expiresIn: '180s' })
+        res.send({email:req.params.email,token:token});
+    }
+    else {
+        next(UserNotFoundException);
+    }
+    
 }
 
 exports.resetPassword = async (req,res,next) => {
@@ -55,27 +64,38 @@ exports.resetPassword = async (req,res,next) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    if (token == null) return res.sendStatus(401);
+
+    if (_.isNil(token)) {
+        next(InvalidAccessTokenException);
+    }
+
     try{
-    const decodedToken = await jwt.verify(token, process.env.TOKEN_SECRET);
+        decodedToken = await jwt.verify(token, process.env.TOKEN_SECRET);
+    } 
+    catch(err) {
+       next(err);
+    }
+
     jwt.verify(token, process.env.TOKEN_SECRET , async (err, user) => {
-        if (err) return res.sendStatus(403);
-        if(!_.isEqual(decodedToken.email,email)) return res.sendStatus(401);
-        user = await User.findOne({where:{email:email}});
-        if(user) {
-            hashedPassword = await bcrypt.hash(newPassword,12);
-            await user.update({password:hashedPassword});
-            res.json("Password Reset Successful");
-        }
-        else {
-            res.json("User not found");
+        if (err) 
+            next(err);
+
+        if(!_.isEqual(decodedToken.email,email)) {
+            next(InvalidAccessTokenException);
         }
 
+        user = await User.findOne({where:{email:email}}).catch(err => next(err));
+
+        if(user) {
+            hashedPassword = await bcrypt.hash(newPassword,12).catch(err => next(err));;
+            await user.update({password:hashedPassword}).catch(err => next(err));;
+            res.json("Password Reset Successful");
+        }
+
+        else {
+            next(UserNotFoundException);
+        }
     })
-}
-catch(err) {
-    res.json(err);
-}
 
 }
 
@@ -91,12 +111,17 @@ exports.signUp = async (request,response,next) => {
 
     const user = {...request.body};
     const errors = validationResult(request);
+
     if (!errors.isEmpty()) {
       return response.status(400).json({ errors: errors.array() });
     }
+
     const exist = await User.findOne({where:{email:user.email}});
-    if(exist)
+
+    if(exist) {
         response.send("User with email already exists");
+    }
+        
 
     else {
         user.password = await bcrypt.hash(user.password,12);

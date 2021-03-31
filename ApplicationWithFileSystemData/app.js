@@ -1,13 +1,13 @@
-const { request, response } = require("express");
-const express = require("express");
-const morgan = require("morgan");
+import { request, response } from 'express';
+import express from 'express';
+import morgan from 'morgan';
 const app = express();
 
-const adminRoutes = require("./routes/admin");
-const userRoutes = require("./routes/users");
-const errorRoutes = require("./routes/error");
-const cryptoRoutes = require("./routes/cryptocurrency");
-const cartRoutes = require("./routes/cart");
+import adminRoutes from './routes/admin';
+import userRoutes from './routes/users';
+import errorRoutes from './routes/error';
+import cryptoRoutes from './routes/cryptocurrency';
+import cartRoutes from './routes/cart';
 
 const homePage = (request,response,next) => {
     response.send("<h1>Welcome to Home Page</h1>");

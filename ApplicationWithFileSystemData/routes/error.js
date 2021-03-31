@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const errorController = require("../controllers/error");
+import errorController from '../controllers/error';
 
 router.use(errorController.handle_404);
 
-module.exports = router;
+export default router;

@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const adminController = require("../controllers/admin");
+import adminController from '../controllers/admin';
 
 router.get("/payments",adminController.getPayments);
 
-module.exports = router;
+export default router;

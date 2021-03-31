@@ -13,11 +13,20 @@ exports.createTransaction = async (request,response,next) => {
         obj.transactionitem = {quantity:obj.cartitem.quantity};
         return obj;
     }));
-    response.send("Transaction Succesful");
+    response.json("Transaction Succesful");
 }
 
 exports.fetchAllTransactions  = async (request,response,next) => {
 
-    const transactions = await request.session.user.getTransactions({include:CryptoCurrency});
-    response.json(transactions);
+    // const transactions = await request.session.user.getTransactions({include:CryptoCurrency});
+    const limit=5;
+    let page = parseInt(request.params.page);
+    const transactions  = await Transaction.findAndCountAll({where:{userId:request.session.user.id},include:CryptoCurrency,limit:limit,offset:(page-1)*limit});
+    const count = transactions["count"];
+    const pageLimit = (_.divide(count,5) + 1)
+    if(page>pageLimit) {
+        page = pageLimit;
+        
+    }
+    response.json(transactions["rows"]);
 }

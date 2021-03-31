@@ -1,7 +1,7 @@
-const Cart = require("../models/cart");
-const CryptoCurrency = require("../models/cryptocurrency");
+import Cart from '../models/cart';
+import CryptoCurrency from '../models/cryptocurrency';
 
-exports.addCryptoToCart = (request,response,next) => {
+export const addCryptoToCart = (request,response,next) => {
 
     const code = request.body.code;
     const quantity = request.body.quantity;
@@ -10,18 +10,18 @@ exports.addCryptoToCart = (request,response,next) => {
             response.send(respMsg);
         });
     })
-}
+};
 
-exports.deleteByCode =  (request,response,next) => {
+export const deleteByCode = (request,response,next) => {
     const code = request.params.code;
     Cart.deleteByCode(code, msg => {
         response.send(msg);
     });
-}
+};
 
-exports.getCart = (request,response,next) => {
+export const getCart = (request,response,next) => {
     Cart.fetchAll(cart => {
         response.send(cart);
     })
     
-}
+};

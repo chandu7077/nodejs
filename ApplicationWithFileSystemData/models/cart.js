@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const CryptoCurrency = require("./cryptocurrency");
+import fs from 'fs';
+import path from 'path';
+import CryptoCurrency from './cryptocurrency';
 
 const file = path.join(path.dirname(require.main.filename),"data","cart.json");
 
@@ -18,7 +18,7 @@ const readFromFile = callback => {
     });
 }
 
-module.exports = class Cart {
+export default class Cart {
     static addCryptoToCart(code, quantity, currentPrice, callback) {
         readFromFile(cart => {
             const index = cart.cryptos.findIndex(obj => obj.code === code);
@@ -79,4 +79,4 @@ module.exports = class Cart {
     }
 
 
-}
+};
