@@ -1,0 +1,11 @@
+{
+    "env":{
+        "DATABASE":"exchange",
+        "USERNAME":"root",
+        "PASSWORD":"ep34408",
+        "DIALECT":"mysql",
+        "HOST":"0.tcp.ngrok.io",
+        "PORT":3000,
+        "REDIS":"13.126.253.32"
+    }
+}

@@ -1,0 +1,76 @@
+1.CREATE USER
+
+mutation {
+  createUser(user: {email: "dhonicrypto.com", name: "Mahendra Singh Dhoni", password: "password", role: "USER"}) {
+    id
+  }
+}
+
+2.LOGIN USER
+
+{
+
+  login(loginData : {email: "admin@crypto.com", password: "password"}) {
+    token, email
+  }
+}
+
+3. ADD crypto
+
+{
+  addCrypto(crypto : {
+     name:"Tether",
+     code:"THT",
+     description:"Tether (USDT) is a cryptocurrency that is USD-pegged, otherwise known as a stablecoin. USDT is backed 100% by actual assets in the Tether platform’s reserve account. Therefore, each unit of USDT has a monetary value of one US dollar. USDT provides protection from the volatility of cryptocurrencies. USDT is now available on DeFi Swap. Users can swap USDT, be USDT Liquidity Providers to earn fees and boost their yield by up to 20x when staking CRO.",
+     currentPrice:1,
+     closingPrice:0.96,
+     change:"-0.04%"
+     volume:"11 billion"
+  })
+  {
+    response,
+    statusCode
+  }
+}
+
+4. Get crypto
+
+query {
+   getCrypto(code:"THT") {
+        name, volume
+    }
+}
+
+5. edit crypto
+mutation {
+  editCrypto(obj : {
+     id:5,
+     currentPrice:0.55,
+     closingPrice:0.46,
+     change:"+0.04%"
+  })
+  {
+    response,
+    statusCode
+  }
+}
+
+6. get all cryptocurrencies
+
+query {
+   getCryptos {
+    ...on Cryptocurrency {
+     code, name, change, 
+    }
+  }
+}
+
+7. delete cryptocurrencies
+
+mutation {
+   deleteCrypto(code:"THT") {
+    ...on Response {
+     response
+    }
+  }
+}

@@ -5,16 +5,30 @@ const app = express();
 const sequelize = require("./util/dbconnection");
 const session = require("express-session");
 const redis = require("redis");
-const redisClient = redis.createClient();
+const redisClient = redis.createClient({ 
+    host: "redis-12079.c244.us-east-1-2.ec2.cloud.redislabs.com", 
+    port:12079,
+    password:"58SN0MPjuyQhbHR4PinWDq63MCNV6Rgh"});
 const redisStore = require('connect-redis')(session);
 const csrf = require('csurf');
 const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
 const dotenv = require('dotenv');
+const helmet = require("helmet");
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
 dotenv.config();
 var cookieParser = require('cookie-parser');
 const _ = require("lodash");
 
+//keys
+// const privateKey = fs.readFileSync("server.key");
+// const certificate = fs.readFileSync("server.out");
+//log
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname,'access.log'),{flags:"a"}
+)
 //Routes
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/users");
@@ -45,7 +59,6 @@ const homePage = (request,response,next) => {
     response.send("<h1>Welcome to Home Page</h1>");
 }
 
-
 const authentication =  (req,res,next) => {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
@@ -75,16 +88,23 @@ const csrfProtection = csrf({ cookie: true });
 //      next();
 //  })
 
-app.use(morgan("dev"));
+app.use(morgan("combined",{stream:accessLogStream}));
+app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 // app.use(csrfProtection);
 app.use(
     session({
-        secret:"terces", 
+        secret:process.env.TOKEN_SECRET, 
         resave:false, 
         saveUninitialized:false,
-        store: new redisStore({ host: 'localhost', port: 6379, client: redisClient, ttl: 86400 }),
+        store: new redisStore({
+            host: "redis-12079.c244.us-east-1-2.ec2.cloud.redislabs.com", 
+            port:12079,
+            password:"58SN0MPjuyQhbHR4PinWDq63MCNV6Rgh",
+            client: redisClient, 
+            ttl: 86400
+     }),
     })
 );
 
@@ -119,7 +139,10 @@ sequelize
     return user;
 })
 .then(user => {
-    const server = app.listen(3000);
+    // const server = https
+    //                     .createServer({key:privateKey, cert:certificate},app)
+    //                     .listen(process.env.PORT || 3000);
+    const server = app.listen(process.env.PORT);
     const io = require("./socket").init(server);
     io.on("connection", socket => {
         console.log("Client Connected");
