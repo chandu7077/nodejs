@@ -23,6 +23,7 @@ const typeDefs = `
     name: String!
     email: String!
     links: [Link!]!
+    votes: [Vote!]!
   }
 
   type Vote {

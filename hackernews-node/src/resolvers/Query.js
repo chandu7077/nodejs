@@ -1,24 +1,37 @@
+import Link from "../models/link"
+import User from "../models/user";
+import { Sequelize } from 'sequelize';
+import { Op } from 'sequelize';
+
 const feed = async (parent, args, context, info) => {
     const where = args.filter
       ? {
-        OR: [
-          { description: { contains: args.filter } },
-          { url: { contains: args.filter } },
+        [Op.or]: [
+          { 
+              description: 
+              { 
+                  [Op.contains]: [args.filter] 
+                } 
+            },
+          {
+               url: 
+                { 
+                    [Op.contains]: [args.filter] 
+                } 
+            },
         ],
       }
       : {}
   
-    const links = await context.prisma.link.findMany({
+    const {rows,count} = await Link.findAndCountAll({
       where,
-      skip: args.skip,
-      take: args.take,
-      orderBy: args.orderBy,
+      limit: args.take,
+      offset: args.skip,
+      order: [["description", args.orderBy.description]]
     })
-    
-    const count = await context.prisma.link.count({ where })
 
   return {
-    links,
+    links:rows,
     count,
   }
   }
@@ -29,7 +42,7 @@ const info = () => {
 
 const link = async (parent,args, context) => {
 
-    const result = await context.prisma.link.findFirst({where:{id:args.id}});
+    const result = await User.findOne({where:{id:args.id}});
     console.log(result);
     if(result.length === 0) {
         throw new Error("Not found")

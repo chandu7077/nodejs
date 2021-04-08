@@ -1,31 +1,24 @@
 import bcrypt from "bcryptjs"
 import jwt from 'jsonwebtoken'
 import { APP_SECRET, getUserId } from '../utils.js';
+import Link from "../models/link.js"
+import User from "../models/user.js";
+import Vote from "../models/vote.js";
 
 const  vote = async (parent, args, context, info) => {
-    // 1
-    const userId = getUserId(context)
-  
-    // 2
-    const evote = await context.prisma.vote.findUnique({
+    const userId = getUserId(context);
+    const evote = await Vote.findOne({
       where: {
-        linkId_userId: {
           linkId: Number(args.linkId),
           userId: userId
         }
-      }
     })
-  
     if (Boolean(evote)) {
       throw new Error(`Already voted for link: ${args.linkId}`)
     }
-  
-    // 3
-    const newVote = context.prisma.vote.create({
-      data: {
-        user: { connect: { id: userId } },
-        link: { connect: { id: Number(args.linkId) } },
-      }
+    const newVote = await Vote.create({
+        userId: userId,
+        linkId:  Number(args.linkId)
     })
     context.pubsub.publish("NEW_VOTE", newVote)
   
@@ -33,22 +26,20 @@ const  vote = async (parent, args, context, info) => {
   }
 
 const post = async (parent, args, context, info) => {
-    const { userId } = context;
-  
-   const newLink = await context.prisma.link.create({
-      data: {
+  const { userId } = context;
+  const user = await User.findOne({where:{id:userId}});
+  console.log(args)
+  const newLink = await user.createLink({
         url: args.url,
-        description: args.description,
-        postedBy: { connect: { id: userId } },
-      }
+        description: args.description
     })
     context.pubsub.publish("NEW_LINK", newLink)
     return newLink;
-  }
+}
 
 const signup = async (parent, args, context, info) => {
     const password = await bcrypt.hash(args.password, 10)
-    const user = await context.prisma.user.create({ data: { ...args, password } })
+    const user = await User.create( { ...args, password })
     const token = jwt.sign({ userId: user.id }, APP_SECRET)
     return {
       token,
@@ -58,7 +49,7 @@ const signup = async (parent, args, context, info) => {
   
   const login = async (parent, args, context, info) => {
 
-    const user = await context.prisma.user.findUnique({ where: { email: args.email } })
+    const user = await User.findOne({ where: { email: args.email } })
     if (!user) {
       throw new Error('No such user found')
     }
@@ -68,7 +59,7 @@ const signup = async (parent, args, context, info) => {
       throw new Error('Invalid password')
     }
   
-    const token = jwt.sign({ userId: user.id }, APP_SECRET)
+    const token = jwt.sign({ userId: user.id }, APP_SECRET,{ expiresIn: '24h' })
     return {
       token,
       user,
